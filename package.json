@@ -1,0 +1,27 @@
+{
+  "name": "youtube-downloader-nodejs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npx ts-node ./src/index.script.ts",
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/fluent-ffmpeg": "^2.1.27",
+    "ts-node": "^10.9.2",
+    "typecript": "^0.0.1-security"
+  },
+  "dependencies": {
+    "@distube/ytdl-core": "^4.15.8",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "fluent-ffmpeg": "^2.1.3"
+  }
+}

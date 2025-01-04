@@ -1,42 +1,61 @@
 import ytdl from "@distube/ytdl-core";
 import fs from "fs"
 import ffmpeg from "fluent-ffmpeg";
+import { FileFmt } from "./utils/utils";
+
 
 ffmpeg.setFfmpegPath("C:\Users\OWNER\Downloads\ffmpeg-7.1-essentials_build\ffmpeg-7.1-essentials_build\bin\ffmpeg.exe");
 
-const downloadVideo = async (url:string,fmt="mp4") => {
-   try {
-    const info = await ytdl.getInfo(url);
-    const title = info.videoDetails.title;
-    console.log('Downloading:' + title);
-   const filePath = `${title}.${fmt}`;
-   const fileStream = fs.createWriteStream(filePath);
-   ytdl(url).pipe(fileStream);
-   fileStream.on("finish",() => {
-    console.log("download sucessfully")
-   })
-   } catch (error) {
-    console.log("error:",error)
-   }
-}
+class YoutubManuScript {
+// the formats for the video are constants so lets do the obivious
+    // private filefmt: FileFmt;
+    protected url: string;
+    // private hasStarted: boolean;
+    // private no: number;
+ constructor(
+// fileFmt: any,
+url: string
+ ) {
+    this.url = url
+ }
 
-const downloadAudio = async (url:string,fmt='mp3') => {
+
+
+
+ async downloadVideo() {
     try {
-       const info = await ytdl.getBasicInfo(url);
-       const title = info.videoDetails.title;
-    console.log('Downloading:' + title);
-    const filePath = `${title}.${fmt}`;
-    const fileStream = fs.createWriteStream(filePath);
-    ytdl(url,{filter: "audioonly"}).pipe(fileStream)
-    fileStream.on("finish",() => {
-        console.log("download sucessful")
-    })
-    } catch (error) {
-    console.log("error:",error)
-    }
-}
+        console.log("starting")
+        const info = await ytdl.getInfo(this.url);
+        const title = info.videoDetails.title;
+        console.log('Downloading:' + title);
+       const filePath = `${title}.${FileFmt.MP4}`;
+       const fileStream = fs.createWriteStream(filePath);
+       ytdl(url).pipe(fileStream);
+       fileStream.on("finish",() => {
+        console.log("download sucessfully")
+       })
+       } catch (error) {
+        return error
+       }
+ }
 
-const downloadAudioAndManipulate = async(url:string,fmt:string,startTime:any,duration:any) => {
+ async downloadAudio() {
+    try {
+        const info = await ytdl.getBasicInfo(this.url);
+        const title = info.videoDetails.title;
+     console.log('Downloading:' + title);
+     const filePath = `${title}.${FileFmt.MP3}`;
+     const fileStream = fs.createWriteStream(filePath);
+     ytdl(url,{filter: "audioonly"}).pipe(fileStream)
+     fileStream.on("finish",() => {
+         console.log("download sucessful")
+     })
+     } catch (error) {
+      return error
+     }
+ }
+
+ async downloadAudioAndManipulate(url:string,fmt:string,startTime:any,duration:any){
     try {
         const info = await ytdl.getBasicInfo(url);
         const title = info.videoDetails.title;
@@ -57,20 +76,23 @@ const downloadAudioAndManipulate = async(url:string,fmt:string,startTime:any,dur
      .run()
 
      } catch (error) {
-     console.log("error:",error)
+     return error
      }
 } 
 
+}
 //got the idea from an upwork project to manipulate audio to download a specific time frame(starting time frame and ending time frame)
-
 //also change the url to the video you want to use 
 const url = "https://youtu.be/A3Q_KXySvCY?si=mt3fRqNSQ1zOqhfa";
+// downloadAudioAndManipulate(url,'mp3',"00:02:00","00:04:30")
+const x = new YoutubManuScript(url).downloadVideo();
+// const y = new YoutubManuScript(url).downloadAudio();
+// const z = new YoutubManuScript(url).downloadAudioAndManipulate(url,"mp3","00:02:00","00:04:30")
 
 
-
-//uncomment the function you wish to use 
-// downloadVideo(url);
-// downloadAudio(url);
-downloadAudioAndManipulate(url,'mp3',"00:02:00","00:04:30")
-
-// console.log()
+// you can substitute the value of x for y,z
+ Promise.resolve(x).then((data) => {
+    console.log(data);
+}).catch((err) => {
+    console.log(err)
+})

@@ -6,53 +6,62 @@ import { FileFmt } from "./utils/utils";
 
 ffmpeg.setFfmpegPath("C:\Users\OWNER\Downloads\ffmpeg-7.1-essentials_build\ffmpeg-7.1-essentials_build\bin\ffmpeg.exe");
 
-class YoutubManuScript {
-// the formats for the video are constants so lets do the obivious
-    // private filefmt: FileFmt;
+export class YoutubManuScript {
     protected url: string;
-    // private hasStarted: boolean;
-    // private no: number;
  constructor(
-// fileFmt: any,
 url: string
  ) {
     this.url = url
  }
 
-
-
-
  async downloadVideo() {
     try {
-        console.log("starting")
+        console.log("starting video download...")
         const info = await ytdl.getInfo(this.url);
         const title = info.videoDetails.title;
-        console.log('Downloading:' + title);
+     console.log('Downloading:' + title);
        const filePath = `${title}.${FileFmt.MP4}`;
        const fileStream = fs.createWriteStream(filePath);
-       ytdl(url).pipe(fileStream);
-       fileStream.on("finish",() => {
-        console.log("download sucessfully")
-       })
+      const videoStream =  ytdl(url,{filter: "videoandaudio"}).pipe(fileStream);
+      return new Promise((resolve, reject) => {
+        fileStream.on('finish', () => {
+            console.log("Video download completed!");
+            resolve(filePath);
+          });
+        videoStream.on("error",(err) => {
+            reject(`error:${err}`)
+            videoStream.close()
+        })
+        fileStream.on('error', (err) => reject(`Error downloading video: ${err}`));
+      })
        } catch (error) {
-        return error
+        console.log(error)
        }
  }
 
  async downloadAudio() {
     try {
-        const info = await ytdl.getBasicInfo(this.url);
+        console.log("starting audio download...")
+        const info = await ytdl.getInfo(this.url);
         const title = info.videoDetails.title;
      console.log('Downloading:' + title);
-     const filePath = `${title}.${FileFmt.MP3}`;
-     const fileStream = fs.createWriteStream(filePath);
-     ytdl(url,{filter: "audioonly"}).pipe(fileStream)
-     fileStream.on("finish",() => {
-         console.log("download sucessful")
-     })
-     } catch (error) {
-      return error
-     }
+       const filePath = `${title}.${FileFmt.MP3}`;
+       const fileStream = fs.createWriteStream(filePath);
+      const audioStream =  ytdl(url,{filter: "audioonly"}).pipe(fileStream);
+      return new Promise((resolve, reject) => {
+        fileStream.on('finish', () => {
+            console.log("audio download completed!");
+            resolve(filePath);
+          });
+        audioStream.on("error",(err) => {
+            reject(`error:${err}`)
+            audioStream.close()
+        })
+        fileStream.on('error', (err) => reject(`Error downloading video: ${err}`));
+      })
+       } catch (error) {
+        console.log(error)
+       }
  }
 
  async downloadAudioAndManipulate(url:string,fmt:string,startTime:any,duration:any){
@@ -76,7 +85,7 @@ url: string
      .run()
 
      } catch (error) {
-     return error
+     console.log(error)
      }
 } 
 
